@@ -156,4 +156,56 @@ class PaymentController extends Controller
             Log::error('Gagal mengirim antrean E-Tiket: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Simulasi pembayaran offline untuk keperluan testing / demo lokal.
+     */
+    public function simulate(Booking $booking)
+    {
+        if ($booking->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if ($booking->status === 'confirmed') {
+            return redirect()->route('customer.history')->with('success', 'Booking ini sudah dibayar.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Lock data
+            $booking = Booking::where('id', $booking->id)->lockForUpdate()->first();
+            $payment = Payment::where('booking_id', $booking->id)->lockForUpdate()->first();
+
+            if (!$payment) {
+                $payment = Payment::create([
+                    'booking_id' => $booking->id,
+                    'amount' => $booking->total_price,
+                    'payment_status' => 'pending',
+                ]);
+            }
+
+            // Update status booking dan pembayaran
+            $booking->update(['status' => 'confirmed']);
+            $payment->update([
+                'payment_status' => 'paid',
+                'payment_method' => 'Simulasi Offline',
+                'transaction_code' => 'SIM-' . strtoupper(\Illuminate\Support\Str::random(12)),
+            ]);
+
+            // Kurangi sisa kursi pesawat
+            $flight = $booking->flight()->lockForUpdate()->first();
+            if ($flight) {
+                $newSeats = max(0, $flight->available_seats - $booking->total_passengers);
+                $flight->update(['available_seats' => $newSeats]);
+            }
+
+            DB::commit();
+            return redirect()->route('customer.history')->with('success', 'Pembayaran simulasi berhasil diproses! Tiket Anda telah aktif.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal memproses simulasi pembayaran: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Gagal memproses simulasi pembayaran: ' . $e->getMessage()]);
+        }
+    }
 }

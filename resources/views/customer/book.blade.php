@@ -179,13 +179,18 @@
             const seatId = this.dataset.seat;
             const seatNumber = this.dataset.number;
             const seatClass = this.dataset.class;
+            
+            const originalBg = seatClass === 'business' ? 'bg-purple-500' : 'bg-green-500';
+            const originalHover = seatClass === 'business' ? 'hover:bg-purple-600' : 'hover:bg-green-600';
 
             if (selectedSeats.has(seatId)) {
                 selectedSeats.delete(seatId);
-                this.classList.remove('ring-4', 'ring-brand-accent', 'scale-110');
+                this.classList.remove('ring-4', 'ring-brand-accent', 'scale-105', 'bg-brand-accent', 'text-brand-900');
+                this.classList.add(originalBg, 'text-white', originalHover);
             } else {
                 selectedSeats.set(seatId, { number: seatNumber, class: seatClass });
-                this.classList.add('ring-4', 'ring-brand-accent', 'scale-110');
+                this.classList.remove(originalBg, originalHover, 'text-white');
+                this.classList.add('ring-4', 'ring-brand-accent', 'scale-105', 'bg-brand-accent', 'text-brand-900');
             }
 
             updatePassengerForms();

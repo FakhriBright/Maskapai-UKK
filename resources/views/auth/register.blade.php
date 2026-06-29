@@ -1,6 +1,7 @@
 <x-guest-layout>
     @php
         $recaptchaSiteKey = (string) config('services.recaptcha.site_key');
+        $recaptchaVersion = strtolower((string) config('services.recaptcha.version', 'v2'));
         $recaptchaEnabled = filled($recaptchaSiteKey)
             && ! \Illuminate\Support\Str::startsWith($recaptchaSiteKey, ['your_', '[']);
     @endphp
@@ -44,8 +45,15 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
-        <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-2" />
+        @if($recaptchaEnabled && $recaptchaVersion === 'v2')
+            <div>
+                <div class="g-recaptcha" data-sitekey="{{ $recaptchaSiteKey }}"></div>
+                <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-2" />
+            </div>
+        @else
+            <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+            <x-input-error :messages="$errors->get('g-recaptcha-response')" class="mt-2" />
+        @endif
 
         <button type="submit" class="w-full rounded-xl bg-brand-900 px-5 py-3 font-bold text-white shadow-lg shadow-slate-300 transition hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-70">
             Daftar dan masuk
@@ -57,7 +65,9 @@
         <a href="{{ route('login') }}" class="font-bold text-brand-900 hover:text-brand-accent">Masuk</a>
     </p>
 
-    @if($recaptchaEnabled)
+    @if($recaptchaEnabled && $recaptchaVersion === 'v2')
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    @elseif($recaptchaEnabled && $recaptchaVersion === 'v3')
         <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaSiteKey }}"></script>
         <script>
             document.getElementById('registerForm').addEventListener('submit', function (event) {

@@ -19,7 +19,7 @@ class FixedRolesSeeder extends Seeder {
                     'name' => $u['name'],
                     'password' => Hash::make('password123'),
                     'role' => $u['role'],
-                    'email_verified_at' => now(), // Langsung verified biar bisa login
+                    'email_verified_at' => now(), 
                 ]
             );
         }

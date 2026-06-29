@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB; // <--- TAMBAHKAN INI!
+use Illuminate\Support\Facades\DB; 
 use App\Models\Airplane;
 
 class AirplaneSeeder extends Seeder
@@ -20,7 +20,6 @@ class AirplaneSeeder extends Seeder
         $seedsToInsert = [];
 
         foreach ($planes as $p) {
-            // Buat data pesawat
             $plane = Airplane::create([
                 'airline_id' => $p['airline_id'],
                 'model' => $p['model'],
@@ -28,7 +27,6 @@ class AirplaneSeeder extends Seeder
                 'capacity' => $p['cap'],
             ]);
 
-            // Generate kursi secara massal
             $rows = intdiv($p['cap'], 6); 
             for ($r = 1; $r <= $rows; $r++) {
                 foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {

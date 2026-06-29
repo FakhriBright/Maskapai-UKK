@@ -47,29 +47,40 @@ class RegisteredUserController extends Controller
 
             $result = $response->json();
 
-            if (!$response->successful() || !($result['success'] ?? false) || ($result['score'] ?? 0) < 0.5) {
+            if (
+                !$response->successful()
+                || !($result['success'] ?? false)
+                || ($this->recaptchaVersion() === 'v3' && ($result['score'] ?? 0) < 0.5)
+            ) {
                 throw ValidationException::withMessages([
                     'g-recaptcha-response' => 'Gagal verifikasi keamanan (Terdeteksi sebagai bot/spam). Silakan coba lagi.',
                 ]);
             }
         }
 
-        // Buat user baru dengan auto-verify email
+        // Buat user baru dengan status verifikasi kondisional
+        $verificationEnabled = filter_var(env('MAIL_VERIFICATION_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'customer', // Default role untuk registrasi publik
-            'email_verified_at' => now(), // ✅ AUTO VERIFY - biar gak perlu kirim email
+            'email_verified_at' => $verificationEnabled ? null : now(),
         ]);
 
-        // Hapus event Registered karena kita auto-verify (gak perlu kirim email verifikasi)
-        // event(new Registered($user)); // <-- DI-COMMENT
+        if ($verificationEnabled) {
+            event(new \Illuminate\Auth\Events\Registered($user));
+            Auth::login($user);
+            return redirect()->route('verification.notice')
+                ->with('success', 'Registrasi berhasil! Silakan periksa email Anda untuk memverifikasi akun.');
+        }
 
         Auth::login($user);
 
-        // ✅ Redirect ke customer dashboard (bukan 'dashboard' yang sudah tidak ada)
-        return redirect()->route('customer.dashboard');
+        // ✅ Redirect ke customer dashboard dengan flash message
+        return redirect()->route('customer.dashboard')
+            ->with('success', 'Registrasi berhasil! Selamat datang di SkyLine Airways.');
     }
 
     private function recaptchaEnabled(): bool
@@ -81,5 +92,10 @@ class RegisteredUserController extends Controller
             && filled($secretKey)
             && ! Str::startsWith($siteKey, ['your_', '['])
             && ! Str::startsWith($secretKey, ['your_', '[']);
+    }
+
+    private function recaptchaVersion(): string
+    {
+        return strtolower((string) config('services.recaptcha.version', 'v2'));
     }
 }

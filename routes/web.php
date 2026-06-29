@@ -15,7 +15,8 @@ use App\Http\Controllers\Manager;
 
 // Landing Page
 Route::get('/', function () {
-    return view('welcome'); // Nanti diganti Landing Page Custom
+    $airports = \App\Models\Airport::orderBy('city')->get();
+    return view('welcome', compact('airports'));
 })->name('home');
 
 // Global Dashboard Redirect Route
@@ -59,9 +60,11 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     
     // Payment
     Route::get('/pay/{booking}', [Customer\PaymentController::class, 'show'])->name('pay');
+    Route::post('/pay/{booking}/simulate', [Customer\PaymentController::class, 'simulate'])->name('pay.simulate');
     
     // History & Ticket
     Route::get('/history', [Customer\TicketController::class, 'history'])->name('history');
+    Route::get('/ticket/{booking}', [Customer\TicketController::class, 'show'])->name('ticket.show');
     Route::get('/ticket/{booking}/download', [Customer\TicketController::class, 'download'])->name('ticket.download');
 });
 

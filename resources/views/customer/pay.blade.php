@@ -78,42 +78,65 @@
                         </div>
                     </div>
 
-                    <button id="pay-button" class="w-full bg-brand-accent hover:bg-amber-500 text-brand-900 font-bold py-3 rounded-lg transition">
-                        Bayar Sekarang
-                    </button>
+                    @if($snapToken)
+                        <button id="pay-button" class="w-full bg-brand-accent hover:bg-amber-500 text-brand-900 font-bold py-3 rounded-lg transition shadow-lg hover:-translate-y-0.5 duration-200">
+                            Bayar Sekarang (Midtrans)
+                        </button>
+                        <p class="text-xs text-slate-500 text-center mt-4">
+                            Pembayaran aman terenkripsi melalui Midtrans Snap.
+                        </p>
+                    @else
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-left">
+                            <div class="flex gap-2 text-amber-800 font-bold text-sm mb-1">
+                                <svg class="w-5 h-5 flex-shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <span>Mode Uji Coba Offline</span>
+                            </div>
+                            <p class="text-xs text-amber-700 leading-relaxed">
+                                Kredensial Midtrans belum dikonfigurasi. Anda dapat menggunakan simulator pembayaran di bawah untuk menyelesaikan proses pemesanan tiket Anda secara offline.
+                            </p>
+                        </div>
+                    @endif
 
-                    <p class="text-xs text-slate-500 text-center mt-4">
-                        Pembayaran aman melalui Midtrans
-                    </p>
+                    <form action="{{ route('customer.pay.simulate', $booking) }}" method="POST" class="mt-3">
+                        @csrf
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg transition shadow-md hover:-translate-y-0.5 duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>Simulasi Pembayaran Sukses</span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Midtrans Snap JS -->
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+@if($snapToken)
+    <!-- Midtrans Snap JS -->
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
 
-@push('scripts')
-<script>
-    document.getElementById('pay-button').addEventListener('click', function() {
-        snap.pay('{{ $snapToken }}', {
-            onSuccess: function(result) {
-                alert('Pembayaran berhasil!');
-                window.location.href = '{{ route('customer.history') }}';
-            },
-            onPending: function(result) {
-                alert('Pembayaran sedang diproses. Silakan cek riwayat booking Anda.');
-                window.location.href = '{{ route('customer.history') }}';
-            },
-            onError: function(result) {
-                alert('Pembayaran gagal. Silakan coba lagi.');
-            },
-            onClose: function() {
-                alert('Anda menutup popup tanpa menyelesaikan pembayaran.');
-            }
+    @push('scripts')
+    <script>
+        document.getElementById('pay-button').addEventListener('click', function() {
+            snap.pay('{{ $snapToken }}', {
+                onSuccess: function(result) {
+                    alert('Pembayaran berhasil!');
+                    window.location.href = '{{ route('customer.history') }}';
+                },
+                onPending: function(result) {
+                    alert('Pembayaran sedang diproses. Silakan cek riwayat booking Anda.');
+                    window.location.href = '{{ route('customer.history') }}';
+                },
+                onError: function(result) {
+                    alert('Pembayaran gagal. Silakan coba lagi.');
+                },
+                onClose: function() {
+                    alert('Anda menutup popup tanpa menyelesaikan pembayaran.');
+                }
+            });
         });
-    });
-</script>
-@endpush
+    </script>
+    @endpush
+@endif
 @endsection

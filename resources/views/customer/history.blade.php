@@ -81,8 +81,11 @@
                                 </a>
                             @endif
                             @if($booking->status === 'confirmed')
+                                <a href="{{ route('customer.ticket.show', $booking) }}" class="bg-brand-accent hover:bg-amber-500 text-brand-900 font-bold py-2 px-4 rounded-lg text-sm transition">
+                                    Lihat E-Tiket
+                                </a>
                                 <a href="{{ route('customer.ticket.download', $booking) }}" class="bg-brand-900 hover:bg-brand-800 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
-                                    Unduh E-Tiket
+                                    Unduh PDF
                                 </a>
                             @endif
                         </div>
