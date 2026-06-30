@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         'role.redirect' => \App\Http\Middleware\RoleRedirect::class,
         'role' => \App\Http\Middleware\EnsureUserRole::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'profile.complete' => \App\Http\Middleware\EnsureProfileIsComplete::class,
     ]);
 
     $middleware->validateCsrfTokens(except: [

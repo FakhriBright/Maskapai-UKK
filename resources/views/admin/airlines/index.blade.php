@@ -1,52 +1,76 @@
 @extends('layouts.admin')
 
+@section('title', 'Manajemen Maskapai - SkyLine Airways')
+
 @section('content')
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-slate-800">Manajemen Maskapai</h1>
-    <a href="{{ route('admin.airlines.create') }}" class="bg-brand-accent hover:bg-amber-500 text-brand-900 font-bold py-2 px-4 rounded-lg shadow transition">
-        + Tambah Maskapai
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Manajemen Maskapai</h1>
+        <p class="text-sm text-slate-500 mt-0.5">{{ $airlines->total() }} maskapai terdaftar di sistem</p>
+    </div>
+    <a href="{{ route('admin.airlines.create') }}" class="inline-flex items-center gap-2 bg-brand-accent hover:bg-amber-500 text-brand-900 font-extrabold py-2.5 px-5 rounded-xl shadow transition w-fit">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Tambah Maskapai
     </a>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold">
-            <tr>
-                <th class="p-4 border-b">Logo</th>
-                <th class="p-4 border-b">Nama Maskapai</th>
-                <th class="p-4 border-b">Kode</th>
-                <th class="p-4 border-b text-right">Aksi</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-            @forelse($airlines as $airline)
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-4">
-                        @if($airline->logo)
-                            <img src="{{ asset('storage/' . $airline->logo) }}" class="w-10 h-10 object-contain rounded">
-                        @else
-                            <div class="w-10 h-10 bg-slate-200 rounded flex items-center justify-center text-slate-500">No Logo</div>
-                        @endif
-                    </td>
-                    <td class="p-4 font-medium text-slate-800">{{ $airline->name }}</td>
-                    <td class="p-4 text-slate-600">{{ $airline->code }}</td>
-                    <td class="p-4 text-right space-x-2">
-                        <a href="{{ route('admin.airlines.edit', $airline) }}" class="text-blue-600 hover:underline text-sm">Edit</a>
-                        <form action="{{ route('admin.airlines.destroy', $airline) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:underline text-sm">Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
                 <tr>
-                    <td colspan="4" class="p-8 text-center text-slate-500">Belum ada data maskapai.</td>
+                    <th class="px-5 py-4">Logo</th>
+                    <th class="px-5 py-4">Nama Maskapai</th>
+                    <th class="px-5 py-4">Kode IATA</th>
+                    <th class="px-5 py-4 text-right">Aksi</th>
                 </tr>
-            @endforelse
-        </tbody>
-    </table>
-    <div class="p-4 border-t border-slate-200">
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                @forelse($airlines as $airline)
+                    <tr class="hover:bg-slate-50/70 transition group">
+                        <td class="px-5 py-4">
+                            @if($airline->logo)
+                                <img src="{{ asset('storage/' . $airline->logo) }}" class="w-11 h-11 object-contain rounded-xl border border-slate-100 p-1 shadow-sm">
+                            @else
+                                <div class="w-11 h-11 bg-slate-100 rounded-xl flex items-center justify-center">
+                                    <i data-lucide="plane" class="w-5 h-5 text-slate-400"></i>
+                                </div>
+                            @endif
+                        </td>
+                        <td class="px-5 py-4 font-extrabold text-slate-800">{{ $airline->name }}</td>
+                        <td class="px-5 py-4">
+                            <span class="bg-brand-900 text-white font-extrabold text-xs px-2.5 py-1 rounded-lg">{{ $airline->code }}</span>
+                        </td>
+                        <td class="px-5 py-4 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
+                                <a href="{{ route('admin.airlines.edit', $airline) }}"
+                                    class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">
+                                    <i data-lucide="pencil" class="w-3 h-3"></i> Edit
+                                </a>
+                                <form action="{{ route('admin.airlines.destroy', $airline) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus maskapai ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-rose-600 text-white px-3 py-1.5 rounded-lg hover:bg-rose-700 transition">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-5 py-16 text-center">
+                            <i data-lucide="plane" class="w-12 h-12 text-slate-200 mx-auto mb-3"></i>
+                            <p class="font-semibold text-slate-400">Belum ada data maskapai.</p>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @if($airlines->hasPages())
+    <div class="px-5 py-4 border-t border-slate-100">
         {{ $airlines->links() }}
     </div>
+    @endif
 </div>
 @endsection

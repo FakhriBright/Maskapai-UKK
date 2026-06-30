@@ -41,6 +41,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800" rel="stylesheet" />
+    <!-- CDNs for visual charts & icons -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased" style="font-family: 'Plus Jakarta Sans', sans-serif;">
     <div class="flex h-screen overflow-hidden">
@@ -156,6 +159,12 @@
                 button.disabled = true;
                 button.dataset.originalText = button.textContent;
                 button.textContent = 'Memproses...';
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.lucide) {
+                lucide.createIcons();
             }
         });
     </script>

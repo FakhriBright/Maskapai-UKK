@@ -56,4 +56,10 @@ class Flight extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
+    // Relasi ke Cabin Classes
+    public function flightClasses()
+    {
+        return $this->hasMany(FlightClass::class);
+    }
 }

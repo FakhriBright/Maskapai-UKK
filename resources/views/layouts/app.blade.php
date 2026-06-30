@@ -17,6 +17,8 @@
     <!-- Flatpickr (Untuk Date Picker di pencarian tiket) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="font-sans antialiased bg-slate-50 text-slate-800">
     <div class="min-h-screen flex flex-col">
@@ -101,6 +103,13 @@
     </div>
 
     <!-- Stack untuk script tambahan per halaman -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

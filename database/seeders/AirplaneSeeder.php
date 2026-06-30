@@ -71,16 +71,39 @@ class AirplaneSeeder extends Seeder
                 'description' => null,
             ]);
 
-            $rows = intdiv($p['cap'], 6);
-            for ($r = 1; $r <= $rows; $r++) {
-                foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {
-                    $seatNum = $r . $col;
-                    $class = ($r <= 5) ? 'business' : 'economy';
-                    
+            // 1. First Class (Baris 1: A, C, D, F -> 1-2-1 layout)
+            foreach (['A', 'C', 'D', 'F'] as $col) {
+                $seedsToInsert[] = [
+                    'airplane_id' => $plane->id,
+                    'seat_number' => '1' . $col,
+                    'class' => 'first',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            // 2. Business Class (Baris 2-5: A, B, E, F -> 2-2 layout)
+            for ($r = 2; $r <= 5; $r++) {
+                foreach (['A', 'B', 'E', 'F'] as $col) {
                     $seedsToInsert[] = [
                         'airplane_id' => $plane->id,
-                        'seat_number' => $seatNum,
-                        'class' => $class,
+                        'seat_number' => $r . $col,
+                        'class' => 'business',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+
+            // 3. Economy Class (Baris 6+: A, B, C, D, E, F -> 3-3 layout)
+            $economySeatsNeeded = max(10, $p['cap'] - 20);
+            $economyRows = ceil($economySeatsNeeded / 6);
+            for ($r = 6; $r < 6 + $economyRows; $r++) {
+                foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {
+                    $seedsToInsert[] = [
+                        'airplane_id' => $plane->id,
+                        'seat_number' => $r . $col,
+                        'class' => 'economy',
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];

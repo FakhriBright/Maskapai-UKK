@@ -112,8 +112,66 @@ class FlightSeeder extends Seeder
             }
         }
 
-        DB::table('flights')->insert($flightsToInsert);
+        $chunks = array_chunk($flightsToInsert, 200);
+        foreach ($chunks as $chunk) {
+            DB::table('flights')->insert($chunk);
+        }
+        
+        // Seed flight classes untuk semua flights yang baru di-insert
+        $flights = DB::table('flights')->select('id', 'price')->get();
+        $classesToInsert = [];
+        
+        foreach ($flights as $f) {
+            // Economy Class
+            $classesToInsert[] = [
+                'flight_id' => $f->id,
+                'class_name' => 'economy',
+                'price_multiplier' => 1.00,
+                'baggage_allowance' => 20,
+                'seat_prefix' => 'Y',
+                'seat_rows' => 25,
+                'seat_columns' => 6,
+                'lounge_access' => false,
+                'meal_type' => 'Snack Only',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            // Business Class
+            $classesToInsert[] = [
+                'flight_id' => $f->id,
+                'class_name' => 'business',
+                'price_multiplier' => 1.80, // Multiplier 1.8x
+                'baggage_allowance' => 30,
+                'seat_prefix' => 'C',
+                'seat_rows' => 4,
+                'seat_columns' => 4,
+                'lounge_access' => true,
+                'meal_type' => 'Premium Hot Meal',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            // First Class
+            $classesToInsert[] = [
+                'flight_id' => $f->id,
+                'class_name' => 'first',
+                'price_multiplier' => 3.00, // Multiplier 3.0x
+                'baggage_allowance' => 45,
+                'seat_prefix' => 'F',
+                'seat_rows' => 1,
+                'seat_columns' => 4,
+                'lounge_access' => true,
+                'meal_type' => 'Fine Dining & Champagne',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        $classChunks = array_chunk($classesToInsert, 500);
+        foreach ($classChunks as $chunk) {
+            DB::table('flight_classes')->insert($chunk);
+        }
         
         $this->command->info('✅ Berhasil membuat ' . count($flightsToInsert) . ' penerbangan!');
+        $this->command->info('✅ Berhasil membuat ' . count($classesToInsert) . ' kelas penerbangan!');
     }
 }

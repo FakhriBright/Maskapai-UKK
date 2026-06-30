@@ -17,7 +17,7 @@ class BookingController extends Controller
      */
     public function show(Flight $flight)
     {
-        $flight->load(['airline', 'departureAirport', 'arrivalAirport']);
+        $flight->load(['airline', 'departureAirport', 'arrivalAirport', 'flightClasses']);
         $seats = $flight->airplane->seats()->orderBy('seat_number')->get();
         return view('customer.book', compact('flight', 'seats'));
     }
@@ -29,6 +29,7 @@ class BookingController extends Controller
     {
         // Validasi input
         $validated = $request->validate([
+            'cabin_class' => 'required|in:economy,business,first',
             'selected_seats' => 'required|array|min:1',
             'selected_seats.*' => 'required|string|max:10',
             'passengers' => 'required|array|min:1',
@@ -52,6 +53,13 @@ class BookingController extends Controller
             return back()->withInput()->withErrors(['seats' => 'Beberapa nomor kursi yang Anda pilih tidak terdaftar.']);
         }
 
+        // Pastikan semua kursi yang dipilih sesuai dengan cabin_class yang dipilih
+        foreach ($seats as $seat) {
+            if ($seat->class !== $validated['cabin_class']) {
+                return back()->withInput()->withErrors(['seats' => 'Kursi ' . $seat->seat_number . ' tidak sesuai dengan kelas kabin ' . ucfirst($validated['cabin_class']) . '.']);
+            }
+        }
+
         // Cek ketersediaan kursi lagi (Double Check terhadap booking confirmed)
         $bookedSeats = Passenger::whereIn('seat_number', $validated['selected_seats'])
             ->whereHas('booking', fn($q) => $q->where('flight_id', $flight->id)->where('status', 'confirmed'))
@@ -61,19 +69,15 @@ class BookingController extends Controller
             return back()->withInput()->withErrors(['seats' => 'Maaf, salah satu kursi yang Anda pilih baru saja dipesan orang lain.']);
         }
 
-        // Hitung total harga berdasarkan kelas kursi & PPN 11%
-        $subtotal = 0;
-        foreach ($validated['selected_seats'] as $seatNum) {
-            $seat = $seats->firstWhere('seat_number', $seatNum);
-            $multiplier = 1.0;
-            if ($seat->class === 'business') {
-                $multiplier = 1.5;
-            } elseif ($seat->class === 'first') {
-                $multiplier = 2.0;
-            }
-            $subtotal += $flight->price * $multiplier;
+        // Dapatkan data kelas kabin dari flight_classes
+        $flightClass = $flight->flightClasses()->where('class_name', $validated['cabin_class'])->first();
+        if (!$flightClass) {
+            return back()->withInput()->withErrors(['cabin_class' => 'Kelas kabin tidak tersedia untuk penerbangan ini.']);
         }
 
+        // Hitung total harga berdasarkan multiplier kelas kabin & PPN 11%
+        $priceMultiplier = $flightClass->price_multiplier;
+        $subtotal = $flight->price * $priceMultiplier * count($validated['selected_seats']);
         $totalPrice = $subtotal * 1.11; // PPN 11%
 
         DB::beginTransaction();

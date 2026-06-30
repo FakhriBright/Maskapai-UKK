@@ -52,20 +52,27 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
    CUSTOMER ROUTES (Portal Pemesanan)
    ========================================================================== */
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
-    Route::get('/dashboard', [Customer\DashboardController::class, 'index'])->name('dashboard');
-    
-    // Booking Flow
-    Route::get('/booking/{flight}', [Customer\BookingController::class, 'show'])->name('booking.show');
-    Route::post('/booking/{flight}', [Customer\BookingController::class, 'store'])->name('booking.store');
-    
-    // Payment
-    Route::get('/pay/{booking}', [Customer\PaymentController::class, 'show'])->name('pay');
-    Route::post('/pay/{booking}/simulate', [Customer\PaymentController::class, 'simulate'])->name('pay.simulate');
-    
-    // History & Ticket
-    Route::get('/history', [Customer\TicketController::class, 'history'])->name('history');
-    Route::get('/ticket/{booking}', [Customer\TicketController::class, 'show'])->name('ticket.show');
-    Route::get('/ticket/{booking}/download', [Customer\TicketController::class, 'download'])->name('ticket.download');
+    // Profile Completion (Bisa diakses tanpa harus lengkap)
+    Route::get('/profile/complete', [Customer\ProfileController::class, 'completeShow'])->name('profile.complete');
+    Route::post('/profile/complete', [Customer\ProfileController::class, 'completeStore'])->name('profile.complete.store');
+
+    // Rute yang wajib melengkapi profil
+    Route::middleware(['profile.complete'])->group(function () {
+        Route::get('/dashboard', [Customer\DashboardController::class, 'index'])->name('dashboard');
+        
+        // Booking Flow
+        Route::get('/booking/{flight}', [Customer\BookingController::class, 'show'])->name('booking.show');
+        Route::post('/booking/{flight}', [Customer\BookingController::class, 'store'])->name('booking.store');
+        
+        // Payment
+        Route::get('/pay/{booking}', [Customer\PaymentController::class, 'show'])->name('pay');
+        Route::post('/pay/{booking}/simulate', [Customer\PaymentController::class, 'simulate'])->name('pay.simulate');
+        
+        // History & Ticket
+        Route::get('/history', [Customer\TicketController::class, 'history'])->name('history');
+        Route::get('/ticket/{booking}', [Customer\TicketController::class, 'show'])->name('ticket.show');
+        Route::get('/ticket/{booking}/download', [Customer\TicketController::class, 'download'])->name('ticket.download');
+    });
 });
 
 /* ==========================================================================

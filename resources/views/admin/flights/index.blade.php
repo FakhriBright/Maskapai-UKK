@@ -1,67 +1,86 @@
 @extends('layouts.admin')
 
+@section('title', 'Manajemen Jadwal Penerbangan - SkyLine Airways')
+
 @section('content')
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-slate-800">Manajemen Jadwal Penerbangan</h1>
-    <a href="{{ route('admin.flights.create') }}" class="bg-brand-accent hover:bg-amber-500 text-brand-900 font-bold py-2 px-4 rounded-lg shadow transition">
-        + Tambah Jadwal
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Jadwal Penerbangan</h1>
+        <p class="text-sm text-slate-500 mt-0.5">{{ $flights->total() }} jadwal terdaftar dalam sistem</p>
+    </div>
+    <a href="{{ route('admin.flights.create') }}" class="inline-flex items-center gap-2 bg-brand-accent hover:bg-amber-500 text-brand-900 font-extrabold py-2.5 px-5 rounded-xl shadow transition w-fit">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Tambah Jadwal
     </a>
 </div>
 
-<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200 sticky top-0">
                 <tr>
-                    <th class="p-4 border-b">No. Penerbangan</th>
-                    <th class="p-4 border-b">Maskapai</th>
-                    <th class="p-4 border-b">Rute</th>
-                    <th class="p-4 border-b">Berangkat</th>
-                    <th class="p-4 border-b">Tiba</th>
-                    <th class="p-4 border-b">Harga</th>
-                    <th class="p-4 border-b">Sisa Kursi</th>
-                    <th class="p-4 border-b text-right">Aksi</th>
+                    <th class="px-5 py-4">No. Penerbangan</th>
+                    <th class="px-5 py-4">Maskapai</th>
+                    <th class="px-5 py-4">Rute</th>
+                    <th class="px-5 py-4">Berangkat</th>
+                    <th class="px-5 py-4">Tiba</th>
+                    <th class="px-5 py-4">Harga</th>
+                    <th class="px-5 py-4">Sisa Kursi</th>
+                    <th class="px-5 py-4">Status</th>
+                    <th class="px-5 py-4 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100 text-sm">
+            <tbody class="divide-y divide-slate-50">
                 @forelse($flights as $flight)
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-4 font-mono font-bold text-brand-600">{{ $flight->flight_number }}</td>
-                        <td class="p-4 font-medium text-slate-800">{{ $flight->airline->name }}</td>
-                        <td class="p-4">
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-slate-700">{{ $flight->departureAirport->iata_code }}</span>
-                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                                <span class="font-bold text-slate-700">{{ $flight->arrivalAirport->iata_code }}</span>
-                            </div>
-                            <div class="text-xs text-slate-500 mt-1">{{ $flight->departureAirport->city }} → {{ $flight->arrivalAirport->city }}</div>
+                    <tr class="hover:bg-slate-50/70 transition group">
+                        <td class="px-5 py-4 font-extrabold text-brand-900 font-mono tracking-wider">{{ $flight->flight_number }}</td>
+                        <td class="px-5 py-4 font-semibold text-slate-700">{{ $flight->airline->name }}</td>
+                        <td class="px-5 py-4">
+                            <div class="font-extrabold text-slate-800">{{ $flight->departureAirport->iata_code }} → {{ $flight->arrivalAirport->iata_code }}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">{{ $flight->departureAirport->city }} — {{ $flight->arrivalAirport->city }}</div>
                         </td>
-                        <td class="p-4 text-slate-600">{{ $flight->departure_time->format('d M Y, H:i') }}</td>
-                        <td class="p-4 text-slate-600">{{ $flight->arrival_time->format('d M Y, H:i') }}</td>
-                        <td class="p-4 font-medium text-slate-800">Rp {{ number_format($flight->price, 0, ',', '.') }}</td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 {{ $flight->available_seats > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded text-xs font-bold">
-                                {{ $flight->available_seats }}
+                        <td class="px-5 py-4 text-slate-600 text-xs font-semibold">{{ $flight->departure_time->format('d M Y') }}<br>{{ $flight->departure_time->format('H:i') }} WIB</td>
+                        <td class="px-5 py-4 text-slate-600 text-xs font-semibold">{{ $flight->arrival_time->format('d M Y') }}<br>{{ $flight->arrival_time->format('H:i') }} WIB</td>
+                        <td class="px-5 py-4 font-extrabold text-slate-800">Rp {{ number_format($flight->price, 0, ',', '.') }}</td>
+                        <td class="px-5 py-4">
+                            <span class="text-xs font-extrabold px-2.5 py-1 rounded-full {{ $flight->available_seats > 20 ? 'bg-emerald-100 text-emerald-700' : ($flight->available_seats > 0 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">
+                                {{ $flight->available_seats }} kursi
                             </span>
                         </td>
-                        <td class="p-4 text-right space-x-2">
-                            <a href="{{ route('admin.flights.edit', $flight) }}" class="text-blue-600 hover:underline text-sm">Edit</a>
-                            <form action="{{ route('admin.flights.destroy', $flight) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus jadwal ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:underline text-sm">Hapus</button>
-                            </form>
+                        <td class="px-5 py-4">
+                            @php $fsc = match($flight->status ?? 'scheduled') { 'boarding'=>'bg-blue-100 text-blue-700', 'delayed'=>'bg-rose-100 text-rose-700', default=>'bg-slate-100 text-slate-600' }; @endphp
+                            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded {{ $fsc }}">{{ $flight->status ?? 'scheduled' }}</span>
+                        </td>
+                        <td class="px-5 py-4 text-right">
+                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
+                                <a href="{{ route('admin.flights.edit', $flight) }}"
+                                    class="inline-flex items-center gap-1 text-[11px] font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">
+                                    <i data-lucide="pencil" class="w-3 h-3"></i> Edit
+                                </a>
+                                <form action="{{ route('admin.flights.destroy', $flight) }}" method="POST" class="inline" onsubmit="return confirm('Yakin hapus jadwal ini?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center gap-1 text-[11px] font-bold bg-rose-600 text-white px-3 py-1.5 rounded-lg hover:bg-rose-700 transition">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="p-8 text-center text-slate-500">Belum ada jadwal penerbangan.</td>
+                        <td colspan="9" class="px-5 py-16 text-center">
+                            <i data-lucide="calendar-x" class="w-12 h-12 text-slate-200 mx-auto mb-3"></i>
+                            <p class="font-semibold text-slate-400">Belum ada jadwal penerbangan.</p>
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="p-4 border-t border-slate-200">
+    @if($flights->hasPages())
+    <div class="px-5 py-4 border-t border-slate-100">
         {{ $flights->links() }}
     </div>
+    @endif
 </div>
 @endsection
