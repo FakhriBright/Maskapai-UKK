@@ -103,6 +103,7 @@ class ReportController extends Controller
             'revenue' => $paymentQuery->sum('amount'),
             'total_bookings' => Booking::where('status', 'confirmed')
                 ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])
+                ->when($airlineId, fn($q) => $q->whereHas('flight', fn($f) => $f->where('airline_id', $airlineId)))
                 ->count(),
         ];
 

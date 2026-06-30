@@ -46,7 +46,9 @@
 </td>
                     <td class="p-4 text-slate-500 text-sm">{{ $user->created_at->format('d M Y') }}</td>
                    <td class="p-4 text-right space-x-2">
-    <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:underline text-sm font-medium">Edit</a>
+    @if(!$user->trashed())
+        <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:underline text-sm font-medium">Edit</a>
+    @endif
     
     @if($user->trashed())
         <!-- User Non-Aktif → Tampilkan tombol Aktifkan -->

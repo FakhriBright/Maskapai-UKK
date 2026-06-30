@@ -14,7 +14,7 @@ class TicketController extends Controller
 
     public function show(Booking $booking) {
         if ($booking->user_id !== auth()->id()) abort(403);
-        $booking->load(['flight.airline', 'flight.departureAirport', 'flight.arrivalAirport', 'passengers.seat']);
+        $booking->load(['flight.airline', 'flight.departureAirport', 'flight.arrivalAirport', 'passengers.booking.flight']);
         
         // Generate SVG QR Code (aman, tidak butuh ekstensi PHP GD)
         try {
@@ -28,16 +28,16 @@ class TicketController extends Controller
 
     public function download(Booking $booking) {
         if ($booking->user_id !== auth()->id()) abort(403);
-        $booking->load(['flight.airline', 'flight.departureAirport', 'flight.arrivalAirport', 'passengers.seat']);
+        $booking->load(['flight.airline', 'flight.departureAirport', 'flight.arrivalAirport', 'passengers.booking.flight']);
         
         try {
-            $qrCode = QrCode::format('png')->size(200)->generate($booking->booking_code);
-            $base64Qr = base64_encode($qrCode);
+            // Gunakan SVG yang aman tanpa butuh GD extension
+            $qrCodeSvg = QrCode::size(140)->generate($booking->booking_code);
         } catch (\Exception $e) {
-            $base64Qr = null; // Fallback jika ekstensi GD tidak aktif
+            $qrCodeSvg = null;
         }
         
-        $pdf = Pdf::loadView('customer.ticket-pdf', compact('booking', 'base64Qr'));
-        return $pdf->download('e-ticket-' . $booking->booking_code . '.pdf');
+        $pdf = Pdf::loadView('customer.ticket-pdf', compact('booking', 'qrCodeSvg'));
+        return $pdf->download('Ticket-' . $booking->booking_code . '.pdf');
     }
 }

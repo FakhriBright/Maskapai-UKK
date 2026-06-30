@@ -92,10 +92,8 @@
                                 <div class="detail-value">{{ $booking->flight->airline->name }}</div>
                             </td>
                             <td class="detail-cell">
-                                <div class="detail-cell">
-                                    <div class="detail-label">Nomor Penerbangan</div>
-                                    <div class="detail-value">{{ $booking->flight->flight_number }}</div>
-                                </div>
+                                <div class="detail-label">Nomor Penerbangan</div>
+                                <div class="detail-value">{{ $booking->flight->flight_number }}</div>
                             </td>
                         </tr>
                         <tr>
@@ -110,12 +108,18 @@
                         </tr>
                         <tr>
                             <td class="detail-cell">
-                                <div class="detail-label">Pesawat / Armada</div>
-                                <div class="detail-value">{{ $booking->flight->airplane->model }}</div>
+                                <div class="detail-label">Waktu Boarding</div>
+                                <div class="detail-value" style="color: #d97706;">{{ $booking->flight->departure_time->copy()->subMinutes(40)->format('H:i') }} WIB</div>
                             </td>
                             <td class="detail-cell">
-                                <div class="detail-label">Waktu Kedatangan</div>
-                                <div class="detail-value">{{ $booking->flight->arrival_time->format('H:i') }} WIB</div>
+                                <div class="detail-label">Gate</div>
+                                <div class="detail-value">Gate {{ (ord(substr($booking->flight->flight_number, -1)) % 6) + 1 }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="detail-cell" colspan="2">
+                                <div class="detail-label">Pesawat / Armada</div>
+                                <div class="detail-value">{{ $booking->flight->airplane->model }} (Tiba: {{ $booking->flight->arrival_time->format('H:i') }} WIB)</div>
                             </td>
                         </tr>
                     </table>
@@ -135,15 +139,17 @@
                                         <div class="passenger-seat">{{ $pax->seat_number }}</div>
                                     </td>
                                     <td style="text-align: right; vertical-align: bottom;">
-                                        <div class="passenger-class">{{ ucfirst($pax->seat->class ?? 'Economy') }} Class</div>
+                                        <div class="passenger-class">{{ ucfirst($pax->getSeatClass()) }} Class</div>
                                     </td>
                                 </tr>
                             </table>
                         </div>
                     @endforeach
 
-                    @if($base64Qr)
-                        <img class="qr-code-img" src="data:image/png;base64,{{ $base64Qr }}" alt="QR Code">
+                    @if($qrCodeSvg)
+                        <div style="display: inline-block; margin-top: 10px;">
+                            {!! $qrCodeSvg !!}
+                        </div>
                     @else
                         <div style="width: 140px; height: 140px; border: 1px solid #d1d5db; background: #e5e7eb; margin: 10px auto; padding: 20px 0; box-sizing: border-box; font-size: 11px;">
                             [QR Code]

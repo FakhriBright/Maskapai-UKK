@@ -35,4 +35,19 @@ class Passenger extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Dapatkan kelas kursi penumpang berdasarkan detail pesawat dan nomor kursi.
+     */
+    public function getSeatClass(): string
+    {
+        $airplaneId = $this->booking->flight->airplane_id ?? null;
+        if ($airplaneId) {
+            $seat = \App\Models\Seat::where('airplane_id', $airplaneId)
+                ->where('seat_number', $this->seat_number)
+                ->first();
+            return $seat ? $seat->class : 'economy';
+        }
+        return 'economy';
+    }
 }

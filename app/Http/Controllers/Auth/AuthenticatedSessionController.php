@@ -28,12 +28,12 @@ public function store(LoginRequest $request): RedirectResponse
 
     $request->session()->regenerate();
 
-    return match (auth()->user()->role) {
-        'admin' => redirect()->route('admin.dashboard'),
-        'manager' => redirect()->route('manager.dashboard'),
-        'staff' => redirect()->route('staff.dashboard'),
-        default => redirect()->route('customer.dashboard'),
-    };
+    return redirect()->intended(match (auth()->user()->role) {
+        'admin' => route('admin.dashboard'),
+        'manager' => route('manager.dashboard'),
+        'staff' => route('staff.dashboard'),
+        default => route('customer.dashboard'),
+    });
 }
     /**
      * Destroy an authenticated session.

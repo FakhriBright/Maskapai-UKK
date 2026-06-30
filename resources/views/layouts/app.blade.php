@@ -39,7 +39,7 @@
         </main>
 
         <!-- Footer Simple -->
-        <footer class="bg-brand-900 text-slate-400 py-8 mt-auto">
+        <footer class="bg-brand-900 text-slate-400 py-8 mt-auto print:hidden">
             <div class="max-w-7xl mx-auto px-4 text-center">
                 <p class="text-sm">&copy; {{ date('Y') }} SkyLine Airways. Project UKK SMK TI BAZMA.</p>
             </div>
@@ -59,10 +59,10 @@
             }
          }" 
          x-init="
-            @if(session('success')) add('{{ session('success') }}', 'success'); @endif
-            @if(session('error')) add('{{ session('error') }}', 'danger'); @endif
-            @if(session('status')) add('{{ session('status') }}', 'info'); @endif
-            @if($errors->any()) add('{{ $errors->first() }}', 'danger'); @endif
+            @if(session('success')) add('{{ addslashes(session('success')) }}', 'success'); @endif
+            @if(session('error')) add('{{ addslashes(session('error')) }}', 'danger'); @endif
+            @if(session('status')) add('{{ addslashes(session('status')) }}', 'info'); @endif
+            @if($errors->any()) add('{{ addslashes($errors->first()) }}', 'danger'); @endif
          "
          class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
         
